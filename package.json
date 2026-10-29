@@ -1,0 +1,11 @@
+{
+  "name": "ekino-tv",
+  "version": "1.0.0",
+  "description": "Ekino.ws na TV z blokadą pop-upów i reklam",
+  "packageType": "mods",
+  "appName": "Ekino",
+  "websiteURL": "https://ekino.ws/",
+  "main": "ekino.js",
+  "keys": ["MediaPlayPause", "MediaPlay", "MediaPause", "MediaStop", "MediaRewind", "MediaFastForward", "ColorF0Red", "ColorF1Green", "ColorF2Yellow", "ColorF3Blue"],
+  "license": "MIT"
+}
