@@ -41,3 +41,84 @@
     }
   }, 1500);
 })();
+
+// Nawigacja pilotem (strzałki/OK/Wstecz), ES5
+(function () {
+  'use strict';
+  var SEL = 'a[href],button,input,select,textarea,[onclick],[role="button"],[tabindex]:not([tabindex="-1"]),.play,.btn';
+  var cur = null;
+  var st = document.createElement('style');
+  st.textContent = '.tvfocus{outline:4px solid #C9A84C!important;outline-offset:2px!important;box-shadow:0 0 14px #C9A84C!important;}';
+  (document.head || document.documentElement).appendChild(st);
+
+  function visible(el) {
+    var r = el.getBoundingClientRect();
+    if (r.width < 8 || r.height < 8) return false;
+    if (r.bottom < 0 || r.top > window.innerHeight * 3) return false;
+    var s = getComputedStyle(el);
+    return s.visibility !== 'hidden' && s.display !== 'none';
+  }
+  function list() {
+    var all = document.querySelectorAll(SEL), out = [];
+    for (var i = 0; i < all.length; i++) if (visible(all[i])) out.push(all[i]);
+    return out;
+  }
+  function center(el) {
+    var r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2, r: r };
+  }
+  function setCur(el) {
+    if (cur) cur.classList.remove('tvfocus');
+    cur = el;
+    if (!el) return;
+    el.classList.add('tvfocus');
+    if (el.focus) try { el.focus({ preventScroll: true }); } catch (e) {}
+    var r = el.getBoundingClientRect();
+    if (r.top < 60 || r.bottom > window.innerHeight - 60) {
+      window.scrollTo(0, window.pageYOffset + r.top - window.innerHeight / 2);
+    }
+  }
+  function move(dir) {
+    var els = list();
+    if (!els.length) return;
+    if (!cur || els.indexOf(cur) < 0) {
+      for (var k = 0; k < els.length; k++) {
+        var rr = els[k].getBoundingClientRect();
+        if (rr.top >= 0 && rr.top < window.innerHeight) { setCur(els[k]); return; }
+      }
+      setCur(els[0]); return;
+    }
+    var c = center(cur), best = null, bs = 1e12;
+    for (var i = 0; i < els.length; i++) {
+      var e = els[i]; if (e === cur) continue;
+      var p = center(e), dx = p.x - c.x, dy = p.y - c.y;
+      var ok = (dir === 'L' && dx < -4) || (dir === 'R' && dx > 4) || (dir === 'U' && dy < -4) || (dir === 'D' && dy > 4);
+      if (!ok) continue;
+      var main = (dir === 'L' || dir === 'R') ? Math.abs(dx) : Math.abs(dy);
+      var side = (dir === 'L' || dir === 'R') ? Math.abs(dy) : Math.abs(dx);
+      var score = main + side * 2.5;
+      if (score < bs) { bs = score; best = e; }
+    }
+    if (best) setCur(best);
+    else if (dir === 'D') window.scrollBy(0, 200);
+    else if (dir === 'U') window.scrollBy(0, -200);
+  }
+  window.addEventListener('keydown', function (e) {
+    var k = e.keyCode, tag = document.activeElement && document.activeElement.tagName;
+    var typing = tag === 'INPUT' || tag === 'TEXTAREA';
+    if (k === 37 || k === 38 || k === 39 || k === 40) {
+      if (typing && (k === 37 || k === 39)) return;
+      e.preventDefault(); e.stopPropagation();
+      move(k === 37 ? 'L' : k === 39 ? 'R' : k === 38 ? 'U' : 'D');
+    } else if (k === 13) {
+      if (cur && !typing) {
+        e.preventDefault(); e.stopPropagation();
+        if (cur.click) cur.click();
+        if (cur.tagName === 'INPUT' || cur.tagName === 'TEXTAREA') cur.focus();
+      }
+    } else if (k === 10009 || k === 8) {
+      if (!typing) { e.preventDefault(); history.back(); }
+    }
+  }, true);
+  setTimeout(function () { move('D'); }, 1500);
+})();
