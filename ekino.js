@@ -122,3 +122,15 @@
   }, true);
   setTimeout(function () { move('D'); }, 1500);
 })();
+
+// Plakietka diagnostyczna: widać, że moduł działa
+(function () {
+  function badge() {
+    var b = document.createElement('div');
+    b.textContent = 'Ekino mod v1.1 OK';
+    b.style.cssText = 'position:fixed;top:8px;right:8px;z-index:2147483647;background:#151728;color:#C9A84C;padding:6px 12px;font:bold 18px sans-serif;border:2px solid #C9A84C;border-radius:6px;';
+    document.documentElement.appendChild(b);
+    setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 6000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', badge); else badge();
+})();
