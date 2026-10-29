@@ -123,14 +123,20 @@
   setTimeout(function () { move('D'); }, 1500);
 })();
 
-// Plakietka diagnostyczna: widać, że moduł działa
+// Plakietka diagnostyczna (stała): wersja, ostatni klawisz, liczba elementów
 (function () {
-  function badge() {
-    var b = document.createElement('div');
-    b.textContent = 'Ekino mod v1.1 OK';
-    b.style.cssText = 'position:fixed;top:8px;right:8px;z-index:2147483647;background:#151728;color:#C9A84C;padding:6px 12px;font:bold 18px sans-serif;border:2px solid #C9A84C;border-radius:6px;';
-    document.documentElement.appendChild(b);
-    setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 6000);
+  var b, last = '-';
+  function upd() {
+    if (!b) return;
+    var n = document.querySelectorAll('a[href],button,input').length;
+    b.textContent = 'Ekino mod v1.2 | klawisz: ' + last + ' | elem: ' + n + ' | fokus: ' + (document.querySelector('.tvfocus') ? 'tak' : 'nie');
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', badge); else badge();
+  function make() {
+    b = document.createElement('div');
+    b.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:2147483647;background:#151728;color:#C9A84C;padding:6px 12px;font:bold 20px sans-serif;border:2px solid #C9A84C;border-radius:6px;pointer-events:none;';
+    document.documentElement.appendChild(b); upd();
+  }
+  window.addEventListener('keydown', function (e) { last = e.keyCode; setTimeout(upd, 50); }, true);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', make); else make();
+  setInterval(upd, 1000);
 })();
